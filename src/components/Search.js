@@ -1,64 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
 import SearchResult from './SearchResult';
 
 const searchBar = {
-    marginLeft: "185%",
-    marginTop: "10%"
+    marginLeft: "30em",
+    marginTop: "2em",
+    display: "flex"
 };
 
 const sesarchResultItem = {
     margin: "2%",
-    display: "grid",
-    gap: " 1rem",
-    gridAutoFlow: "column",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min-content, 1fr))"
-}
+    display: "flex",
+    flexDirection: "column"
+};
 
 
 const Search = () => {
     const [searchKey, setSearchKey] = useState('');
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const getData = async (key) => {
-        let res = await axios.get('https://rcfqabqwb3.execute-api.us-east-2.amazonaws.com/search?key=sahil', {
-            headers: {
-                key
-            }
-        });
-        console.log(res.data);
-        setData(res.data);
-    }
+        console.log("varaible test", process.env.REACT_APP_API_ENDPOINT);
+        try {
+            let params = { key };
+            let res = await axios.get(process.env.REACT_APP_API_ENDPOINT, { params });
+            console.log(res.data);
+            setData(res.data);
+            setLoading(false);
 
-    useEffect(() => {
-        if (searchKey) {
-            getData(searchKey)
+        } catch (error) {
+            console.log(error);
         }
-    }, [searchKey])
+    };
     console.log(searchKey);
     return (
-        <div style={{ width: 400 }}>
-            <form style={searchBar} noValidate autoComplete="off">
-                <TextField onChange={event => setSearchKey(event.target.value.trim())} id="outlined-basic" label="Search" variant="outlined" style={{ width: '400px' }} />
+        <div style={{ width: "100%" }}>
+            <form style={searchBar} onSubmit={event => {
+                event.preventDefault();
+                if (searchKey) {
+                    setLoading(true);
+                    getData(searchKey);
+                }
+            }} noValidate autoComplete="off">
+                <TextField value={searchKey} onChange={(event) => setSearchKey(event.target.value)} id="outlined-basic" label="Search" variant="outlined" style={{ width: '400px', marginRight: "5px" }} /> <button type="button" onClick={() => {
+                    setSearchKey('');
+                    setData([]);
+                }
+                } >Clear</button>
             </form>
-            <div>
+            <div style={{ display: "flex", width: "100%", justifyContent: "center", margin: "5px" }}>{loading ? <p >loading...</p> : (<div style={{ display: "flex" }}>
                 {data.length ? (
                     <div style={sesarchResultItem}> {data.map((dataElement, idx) => {
                         return (
-                            //   <div key={idx} ><pre>{JSON.stringify(dataElement,null,2)}</pre></div>
-                            <SearchResult key={idx} dataElement={dataElement} />
-                        )
+                            <SearchResult style={{ margin: "2%" }} key={idx} dataElement={dataElement} />
+                        );
                     })} </div>
-                ) : <div>no results</div>}
-            </div>
+                ) : <div><h3>No Records</h3></div>}
+            </div>)}</div>
+
         </div>
     );
-}
+};
 
 
-
-// Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
-// { title: 'The Shawshank Redemption', year: 1994 }
 
 export default Search;
