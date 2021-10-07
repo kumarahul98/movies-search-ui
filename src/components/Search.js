@@ -22,10 +22,10 @@ const Search = () => {
     const [loading, setLoading] = useState(false);
 
     const getData = async (key) => {
-        console.log("varaible test", process.env.REACT_APP_API_ENDPOINT);
+        console.log("varaible test", `${process.env.REACT_APP_API_ENDPOINT}/search`);
         try {
             let params = { key };
-            let res = await axios.get(process.env.REACT_APP_API_ENDPOINT, { params });
+            let res = await axios.get(`${process.env.REACT_APP_API_ENDPOINT}/search`, { params });
             console.log(res.data);
             setData(res.data);
             setLoading(false);
